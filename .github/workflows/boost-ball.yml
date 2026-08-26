@@ -1,0 +1,31 @@
+name: Boost ball power
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  boost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Increase ball power
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('speed=6.3','speed=9.0')
+          s=s.replace('ball.vy+=.035*dt*60','ball.vy+=.012*dt*60')
+          p.write_text(s)
+          PY
+          if git diff --quiet -- index.html; then
+            echo 'No ball changes needed'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Increase ball launch power'
+          git push
